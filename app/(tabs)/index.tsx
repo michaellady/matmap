@@ -1,31 +1,65 @@
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import * as Crypto from 'expo-crypto';
+import { ClassForm, ClassFormData } from '@/components/ClassForm';
+import { useDatabase } from '@/hooks/useDatabase';
+import { createClassLog } from '@/db/classLogs';
+import { DARK_THEME } from '@/constants/colors';
+import { useLocalSearchParams } from 'expo-router';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function PlanClassScreen() {
+  const { db, incrementDataVersion } = useDatabase();
+  const params = useLocalSearchParams<{
+    standing_zoom_in?: string;
+    guard?: string;
+    submission?: string;
+  }>();
+  const [key, setKey] = useState(0);
 
-export default function TabOneScreen() {
+  const initialData = params.standing_zoom_in
+    ? {
+        standing_zoom_in: params.standing_zoom_in,
+        guard: params.guard,
+        submission: params.submission,
+      }
+    : undefined;
+
+  const handleSubmit = (data: ClassFormData) => {
+    if (!db) return;
+
+    createClassLog(db, {
+      id: Crypto.randomUUID(),
+      ...data,
+    });
+
+    incrementDataVersion();
+    Alert.alert('Saved!', 'Class plan saved successfully.');
+    setKey((k) => k + 1);
+  };
+
+  if (!db) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={DARK_THEME.accent} />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <ClassForm
+      key={key}
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      submitLabel="Save Class"
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loading: {
     flex: 1,
+    backgroundColor: DARK_THEME.background,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
   },
 });
