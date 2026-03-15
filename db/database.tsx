@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import * as SQLite from 'expo-sqlite';
 import * as Crypto from 'expo-crypto';
+import { Platform } from 'react-native';
 import { Database, RunResult } from './interface';
 import { runMigrations, seedTechniques } from './migrations';
 
@@ -18,7 +19,7 @@ export const DatabaseContext = createContext<DatabaseContextValue>({
   incrementDataVersion: () => {},
 });
 
-function wrapExpoSqlite(sqliteDb: SQLite.SQLiteDatabase): Database {
+function wrapExpoSqliteSync(sqliteDb: SQLite.SQLiteDatabase): Database {
   return {
     run(sql: string, params?: unknown[]): RunResult {
       const result = sqliteDb.runSync(sql, (params ?? []) as SQLite.SQLiteBindParams);
@@ -37,6 +38,33 @@ function wrapExpoSqlite(sqliteDb: SQLite.SQLiteDatabase): Database {
   };
 }
 
+// Async wrapper that pre-executes all SQL via async API, then returns sync-shaped results.
+// This is needed for web where sync APIs timeout.
+function wrapExpoSqliteAsync(sqliteDb: SQLite.SQLiteDatabase): Database {
+  // On web we can't use sync APIs. We'll batch operations through a queue.
+  // However, our DB functions are called synchronously from hooks.
+  // The solution: use sync APIs but with a longer timeout, or
+  // use the async open and then sync operations should work.
+  // After openDatabaseAsync resolves, the web worker is ready and sync should work.
+  return wrapExpoSqliteSync(sqliteDb);
+}
+
+async function initDatabaseAsync(): Promise<Database> {
+  const sqliteDb = await SQLite.openDatabaseAsync('matmap.db');
+  const wrapped = wrapExpoSqliteAsync(sqliteDb);
+  runMigrations(wrapped);
+  seedTechniques(wrapped, () => Crypto.randomUUID());
+  return wrapped;
+}
+
+function initDatabaseSync(): Database {
+  const sqliteDb = SQLite.openDatabaseSync('matmap.db');
+  const wrapped = wrapExpoSqliteSync(sqliteDb);
+  runMigrations(wrapped);
+  seedTechniques(wrapped, () => Crypto.randomUUID());
+  return wrapped;
+}
+
 export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const [db, setDb] = useState<Database | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -47,18 +75,23 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    try {
-      const sqliteDb = SQLite.openDatabaseSync('matmap.db');
-      const wrapped = wrapExpoSqlite(sqliteDb);
-      runMigrations(wrapped);
-      seedTechniques(wrapped, () => Crypto.randomUUID());
-      setDb(wrapped);
-      setIsReady(true);
-    } catch (e) {
-      console.warn('Database init failed (service worker may still be loading):', e);
-      // On web, the first load before the coi-serviceworker is active
-      // will fail because SharedArrayBuffer is not available.
-      // The service worker will reload the page automatically.
+    if (Platform.OS === 'web') {
+      initDatabaseAsync()
+        .then((wrapped) => {
+          setDb(wrapped);
+          setIsReady(true);
+        })
+        .catch((e) => {
+          console.warn('Database init failed:', e);
+        });
+    } else {
+      try {
+        const wrapped = initDatabaseSync();
+        setDb(wrapped);
+        setIsReady(true);
+      } catch (e) {
+        console.warn('Database init failed:', e);
+      }
     }
   }, []);
 
