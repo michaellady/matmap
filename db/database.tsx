@@ -47,12 +47,19 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const sqliteDb = SQLite.openDatabaseSync('matmap.db');
-    const wrapped = wrapExpoSqlite(sqliteDb);
-    runMigrations(wrapped);
-    seedTechniques(wrapped, () => Crypto.randomUUID());
-    setDb(wrapped);
-    setIsReady(true);
+    try {
+      const sqliteDb = SQLite.openDatabaseSync('matmap.db');
+      const wrapped = wrapExpoSqlite(sqliteDb);
+      runMigrations(wrapped);
+      seedTechniques(wrapped, () => Crypto.randomUUID());
+      setDb(wrapped);
+      setIsReady(true);
+    } catch (e) {
+      console.warn('Database init failed (service worker may still be loading):', e);
+      // On web, the first load before the coi-serviceworker is active
+      // will fail because SharedArrayBuffer is not available.
+      // The service worker will reload the page automatically.
+    }
   }, []);
 
   return (
