@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
 import { Database, RunResult } from './interface';
-import { runMigrations, seedTechniques } from './migrations';
+import { SEED_TECHNIQUES } from '@/constants/seedData';
 
 interface DatabaseContextValue {
   db: Database | null;
@@ -38,30 +38,61 @@ function wrapExpoSqliteSync(sqliteDb: SQLite.SQLiteDatabase): Database {
   };
 }
 
-// Async wrapper that pre-executes all SQL via async API, then returns sync-shaped results.
-// This is needed for web where sync APIs timeout.
-function wrapExpoSqliteAsync(sqliteDb: SQLite.SQLiteDatabase): Database {
-  // On web we can't use sync APIs. We'll batch operations through a queue.
-  // However, our DB functions are called synchronously from hooks.
-  // The solution: use sync APIs but with a longer timeout, or
-  // use the async open and then sync operations should work.
-  // After openDatabaseAsync resolves, the web worker is ready and sync should work.
+// On web, wrap the async API to look sync by caching the SQLiteDatabase
+// after async init. The key is: open async, migrate async, then use sync.
+async function initDatabaseOnWeb(): Promise<Database> {
+  const sqliteDb = await SQLite.openDatabaseAsync('matmap.db');
+
+  // Run migrations via async API
+  await sqliteDb.execAsync(`
+    CREATE TABLE IF NOT EXISTS technique (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL CHECK(category IN ('standing_zoom_in', 'guard', 'submission')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT
+    );
+    CREATE TABLE IF NOT EXISTS class_log (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      week_theme TEXT NOT NULL DEFAULT '',
+      standing_zoom_in TEXT NOT NULL REFERENCES technique(id),
+      guard TEXT NOT NULL REFERENCES technique(id),
+      submission TEXT NOT NULL REFERENCES technique(id),
+      guard_zoom_in_notes TEXT NOT NULL DEFAULT '',
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_class_log_date ON class_log(date);
+    CREATE INDEX IF NOT EXISTS idx_technique_category ON technique(category);
+  `);
+
+  // Seed via async API
+  const existing = await sqliteDb.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM technique');
+  if (!existing || existing.count === 0) {
+    for (const t of SEED_TECHNIQUES) {
+      await sqliteDb.runAsync(
+        'INSERT INTO technique (id, name, category) VALUES (?, ?, ?)',
+        [Crypto.randomUUID(), t.name, t.category]
+      );
+    }
+  }
+
+  // Now wrap with sync interface — the worker is fully initialized
+  // so sync operations should work
   return wrapExpoSqliteSync(sqliteDb);
 }
 
-async function initDatabaseAsync(): Promise<Database> {
-  const sqliteDb = await SQLite.openDatabaseAsync('matmap.db');
-  const wrapped = wrapExpoSqliteAsync(sqliteDb);
-  runMigrations(wrapped);
-  seedTechniques(wrapped, () => Crypto.randomUUID());
-  return wrapped;
-}
-
-function initDatabaseSync(): Database {
+function initDatabaseNative(): Database {
   const sqliteDb = SQLite.openDatabaseSync('matmap.db');
   const wrapped = wrapExpoSqliteSync(sqliteDb);
+
+  // Import and run migrations synchronously on native
+  const { runMigrations, seedTechniques } = require('./migrations');
   runMigrations(wrapped);
   seedTechniques(wrapped, () => Crypto.randomUUID());
+
   return wrapped;
 }
 
@@ -76,7 +107,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (Platform.OS === 'web') {
-      initDatabaseAsync()
+      initDatabaseOnWeb()
         .then((wrapped) => {
           setDb(wrapped);
           setIsReady(true);
@@ -86,7 +117,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
         });
     } else {
       try {
-        const wrapped = initDatabaseSync();
+        const wrapped = initDatabaseNative();
         setDb(wrapped);
         setIsReady(true);
       } catch (e) {
