@@ -20,7 +20,7 @@ describe('migrations', () => {
   it('seeds 22 techniques', () => {
     const db = createSeededTestDb();
     const result = db.get<{ count: number }>('SELECT COUNT(*) as count FROM technique');
-    expect(result?.count).toBe(22);
+    expect(result?.count).toBe(25);
   });
 
   it('seeds 10 standing techniques', () => {
@@ -52,6 +52,6 @@ describe('migrations', () => {
     const { seedTechniques } = require('../../db/migrations');
     seedTechniques(db, () => 'extra-id');
     const result = db.get<{ count: number }>('SELECT COUNT(*) as count FROM technique');
-    expect(result?.count).toBe(22);
+    expect(result?.count).toBe(25);
   });
 });

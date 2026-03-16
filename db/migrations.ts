@@ -60,7 +60,23 @@ export function runMigrations(db: Database): void {
 
 export function seedTechniques(db: Database, generateId: () => string): void {
   const existing = db.get<{ count: number }>('SELECT COUNT(*) as count FROM technique');
-  if (existing && existing.count > 0) return;
+  if (existing && existing.count > 0) {
+    // Seed any new techniques that don't exist yet (e.g., pinning added later)
+    for (const t of SEED_TECHNIQUES) {
+      const found = db.get<{ id: string }>(
+        'SELECT id FROM technique WHERE name = ? AND category = ?',
+        [t.name, t.category]
+      );
+      if (!found) {
+        db.run('INSERT INTO technique (id, name, category) VALUES (?, ?, ?)', [
+          generateId(),
+          t.name,
+          t.category,
+        ]);
+      }
+    }
+    return;
+  }
 
   const stmt = 'INSERT INTO technique (id, name, category) VALUES (?, ?, ?)';
   for (const t of SEED_TECHNIQUES) {

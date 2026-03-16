@@ -24,6 +24,10 @@ export const SEED_TECHNIQUES: SeedTechnique[] = [
   { name: 'Open guard', category: 'guard' },
   { name: 'Closed guard', category: 'guard' },
   { name: 'Ashi garami / leg entanglements', category: 'guard' },
+  // Pinning (3)
+  { name: 'Mount escapes', category: 'pinning' },
+  { name: 'Side control escapes', category: 'pinning' },
+  { name: 'North south escapes', category: 'pinning' },
   // Submissions (6)
   { name: 'RNC', category: 'submission' },
   { name: 'Front headlocks', category: 'submission' },

@@ -32,10 +32,11 @@ describe('techniques', () => {
     techniques.forEach((t) => expect(t.category).toBe('submission'));
   });
 
-  it('returns 0 pinning techniques (none seeded)', () => {
+  it('returns 3 pinning techniques', () => {
     const db = createSeededTestDb();
     const techniques = getTechniquesByCategory(db, 'pinning');
-    expect(techniques).toHaveLength(0);
+    expect(techniques).toHaveLength(3);
+    techniques.forEach((t) => expect(t.category).toBe('pinning'));
   });
 
   it('returns a technique by ID', () => {
@@ -48,7 +49,7 @@ describe('techniques', () => {
   it('returns all active techniques', () => {
     const db = createSeededTestDb();
     const all = getAllTechniques(db);
-    expect(all).toHaveLength(22);
+    expect(all).toHaveLength(25);
   });
 
   it('creates a new technique', () => {
@@ -71,7 +72,7 @@ describe('techniques', () => {
     const db = createSeededTestDb();
     deleteTechnique(db, 'test-id-0001');
     const all = getAllTechniques(db);
-    expect(all).toHaveLength(21);
+    expect(all).toHaveLength(24);
     const t = getTechniqueById(db, 'test-id-0001');
     expect(t).toBeDefined();
     expect(t!.deleted_at).not.toBeNull();

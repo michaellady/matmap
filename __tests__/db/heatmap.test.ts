@@ -30,7 +30,7 @@ describe('getTechniqueTemperatures', () => {
     const db = createSeededTestDb();
     insertTestClasses(db);
     const temps = getTechniqueTemperatures(db, undefined, '2026-03-14');
-    expect(temps).toHaveLength(22);
+    expect(temps).toHaveLength(25);
   });
 
   it('returns temperatures filtered by category', () => {
@@ -100,7 +100,7 @@ describe('getColdSpots', () => {
     const db = createSeededTestDb();
     insertTestClasses(db);
     const spots = getColdSpots(db, '2026-03-14');
-    expect(spots).toHaveLength(22);
+    expect(spots).toHaveLength(25);
   });
 
   it('includes temperature score and color', () => {
@@ -123,8 +123,8 @@ describe('getSuggestedPlan', () => {
     expect(plan!.standing.category).toBe('standing');
     expect(plan!.guard.category).toBe('guard');
     expect(plan!.submission.category).toBe('submission');
-    // pinning is null because no pinning techniques exist
-    expect(plan!.pinning).toBeNull();
+    expect(plan!.pinning).not.toBeNull();
+    expect(plan!.pinning!.category).toBe('pinning');
   });
 
   it('picks never-taught techniques when available', () => {
