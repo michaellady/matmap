@@ -24,6 +24,11 @@ interface TechniqueGroup {
   techniques: TechniqueInfo[];
 }
 
+interface CategorySection {
+  category: Category;
+  groups: TechniqueGroup[];
+}
+
 function getGroupName(name: string): string {
   const arrowIdx = name.indexOf(' → ');
   return arrowIdx !== -1 ? name.substring(0, arrowIdx) : name;
@@ -41,7 +46,6 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
   const filteredCategories: Category[] =
     selectedCategory === 'all' ? CATEGORIES : [selectedCategory];
 
-  // Build cell lookup
   const cellMap = useMemo(() => {
     const map = new Map<string, HeatmapCellData>();
     grid.forEach((cell) => {
@@ -50,34 +54,40 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
     return map;
   }, [grid]);
 
-  // Get unique techniques for filtered categories
-  const techniqueList = useMemo(() => {
-    const techniques = new Map<string, TechniqueInfo>();
-    grid.forEach((cell) => {
-      if (filteredCategories.includes(cell.category) && !techniques.has(cell.techniqueId)) {
-        techniques.set(cell.techniqueId, {
-          id: cell.techniqueId,
-          name: cell.techniqueName,
-          category: cell.category,
-        });
-      }
-    });
-    return Array.from(techniques.values());
-  }, [grid, selectedCategory]);
+  // Build sections: category → groups → techniques
+  const sections = useMemo(() => {
+    // Collect techniques per category
+    const techByCategory = new Map<Category, TechniqueInfo[]>();
+    filteredCategories.forEach((cat) => techByCategory.set(cat, []));
 
-  // Group techniques by parent position
-  const groups = useMemo(() => {
-    const groupMap = new Map<string, TechniqueGroup>();
-    techniqueList.forEach((tech) => {
-      const gName = getGroupName(tech.name);
-      const key = `${tech.category}:${gName}`;
-      if (!groupMap.has(key)) {
-        groupMap.set(key, { groupName: gName, category: tech.category, techniques: [] });
+    grid.forEach((cell) => {
+      if (!filteredCategories.includes(cell.category)) return;
+      const list = techByCategory.get(cell.category)!;
+      if (!list.find((t) => t.id === cell.techniqueId)) {
+        list.push({ id: cell.techniqueId, name: cell.techniqueName, category: cell.category });
       }
-      groupMap.get(key)!.techniques.push(tech);
     });
-    return Array.from(groupMap.values());
-  }, [techniqueList]);
+
+    // Build groups within each category
+    const result: CategorySection[] = [];
+    filteredCategories.forEach((cat) => {
+      const techniques = techByCategory.get(cat) ?? [];
+      if (techniques.length === 0) return;
+
+      const groupMap = new Map<string, TechniqueGroup>();
+      techniques.forEach((tech) => {
+        const gName = getGroupName(tech.name);
+        if (!groupMap.has(gName)) {
+          groupMap.set(gName, { groupName: gName, category: cat, techniques: [] });
+        }
+        groupMap.get(gName)!.techniques.push(tech);
+      });
+
+      result.push({ category: cat, groups: Array.from(groupMap.values()) });
+    });
+
+    return result;
+  }, [grid, selectedCategory]);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups((prev) => {
@@ -88,7 +98,6 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
     });
   };
 
-  // Aggregate cell counts for a group across a week
   const getGroupCount = (group: TechniqueGroup, weekStart: string): number => {
     let total = 0;
     group.techniques.forEach((t) => {
@@ -100,8 +109,7 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
 
   const getGroupColor = (count: number): string => {
     if (count === 0) return DARK_THEME.surfaceLight;
-    const score = Math.min(count * 3, 10);
-    return temperatureToColor(score);
+    return temperatureToColor(Math.min(count * 3, 10));
   };
 
   return (
@@ -142,61 +150,29 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
             ))}
           </View>
 
-          {/* Grouped technique rows */}
-          {groups.map((group) => {
-            const groupKey = `${group.category}:${group.groupName}`;
-            const isSingle = group.techniques.length === 1;
-            const isExpanded = expandedGroups.has(groupKey);
+          {/* Category sections */}
+          {sections.map((section) => (
+            <View key={section.category}>
+              {/* Category header */}
+              <View style={styles.categoryHeader}>
+                <Text style={styles.categoryHeaderText}>
+                  {CATEGORY_LABELS[section.category]}
+                </Text>
+              </View>
 
-            if (isSingle) {
-              // Single technique — no grouping needed
-              const tech = group.techniques[0];
-              return (
-                <View key={groupKey} style={styles.row}>
-                  <View style={styles.labelCell}>
-                    <Text style={styles.labelText} numberOfLines={1}>
-                      {tech.name}
-                    </Text>
-                  </View>
-                  {weekStarts.map((ws) => {
-                    const cell = cellMap.get(`${tech.id}-${ws}`);
-                    return (
-                      <HeatmapCell key={ws} color={cell?.color ?? DARK_THEME.surfaceLight} />
-                    );
-                  })}
-                </View>
-              );
-            }
+              {/* Groups within category */}
+              {section.groups.map((group) => {
+                const groupKey = `${group.category}:${group.groupName}`;
+                const isSingle = group.techniques.length === 1;
+                const isExpanded = expandedGroups.has(groupKey);
 
-            // Multi-technique group
-            return (
-              <View key={groupKey}>
-                {/* Group header row (collapsed aggregate) */}
-                <Pressable
-                  style={styles.row}
-                  onPress={() => toggleGroup(groupKey)}
-                >
-                  <View style={styles.labelCell}>
-                    <Text style={styles.groupLabelText} numberOfLines={1}>
-                      {isExpanded ? '▾' : '▸'} {group.groupName}{' '}
-                      <Text style={styles.groupCount}>({group.techniques.length})</Text>
-                    </Text>
-                  </View>
-                  {weekStarts.map((ws) => {
-                    const count = getGroupCount(group, ws);
-                    return (
-                      <HeatmapCell key={ws} color={getGroupColor(count)} />
-                    );
-                  })}
-                </Pressable>
-
-                {/* Expanded sub-technique rows */}
-                {isExpanded &&
-                  group.techniques.map((tech) => (
-                    <View key={tech.id} style={styles.row}>
-                      <View style={styles.subLabelCell}>
-                        <Text style={styles.subLabelText} numberOfLines={1}>
-                          {getSubName(tech.name)}
+                if (isSingle) {
+                  const tech = group.techniques[0];
+                  return (
+                    <View key={groupKey} style={styles.row}>
+                      <View style={styles.labelCell}>
+                        <Text style={styles.labelText} numberOfLines={1}>
+                          {tech.name}
                         </Text>
                       </View>
                       {weekStarts.map((ws) => {
@@ -206,10 +182,44 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
                         );
                       })}
                     </View>
-                  ))}
-              </View>
-            );
-          })}
+                  );
+                }
+
+                return (
+                  <View key={groupKey}>
+                    <Pressable style={styles.row} onPress={() => toggleGroup(groupKey)}>
+                      <View style={styles.labelCell}>
+                        <Text style={styles.groupLabelText} numberOfLines={1}>
+                          {isExpanded ? '▾' : '▸'} {group.groupName}{' '}
+                          <Text style={styles.groupCount}>({group.techniques.length})</Text>
+                        </Text>
+                      </View>
+                      {weekStarts.map((ws) => (
+                        <HeatmapCell key={ws} color={getGroupColor(getGroupCount(group, ws))} />
+                      ))}
+                    </Pressable>
+
+                    {isExpanded &&
+                      group.techniques.map((tech) => (
+                        <View key={tech.id} style={styles.row}>
+                          <View style={styles.subLabelCell}>
+                            <Text style={styles.subLabelText} numberOfLines={1}>
+                              {getSubName(tech.name)}
+                            </Text>
+                          </View>
+                          {weekStarts.map((ws) => {
+                            const cell = cellMap.get(`${tech.id}-${ws}`);
+                            return (
+                              <HeatmapCell key={ws} color={cell?.color ?? DARK_THEME.surfaceLight} />
+                            );
+                          })}
+                        </View>
+                      ))}
+                  </View>
+                );
+              })}
+            </View>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -217,73 +227,31 @@ export function HeatmapGrid({ grid, weekStarts }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  filterBar: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
+  container: { marginBottom: 16 },
+  filterBar: { flexDirection: 'row', marginBottom: 12, paddingHorizontal: 16 },
   filterTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginRight: 8,
-    backgroundColor: DARK_THEME.surface,
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8,
+    marginRight: 8, backgroundColor: DARK_THEME.surface,
   },
-  filterTabActive: {
-    backgroundColor: DARK_THEME.accent,
+  filterTabActive: { backgroundColor: DARK_THEME.accent },
+  filterText: { fontSize: 13, color: DARK_THEME.textSecondary, fontWeight: '500' },
+  filterTextActive: { color: '#FFFFFF' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  weekHeader: { width: 32, alignItems: 'center' },
+  weekHeaderText: { fontSize: 10, color: DARK_THEME.textMuted },
+  categoryHeader: {
+    paddingVertical: 6, paddingLeft: 2, marginTop: 8,
+    borderBottomWidth: 1, borderBottomColor: DARK_THEME.border,
   },
-  filterText: {
-    fontSize: 13,
-    color: DARK_THEME.textSecondary,
-    fontWeight: '500',
+  categoryHeaderText: {
+    fontSize: 13, fontWeight: '700', color: DARK_THEME.accent,
+    textTransform: 'uppercase', letterSpacing: 0.5,
   },
-  filterTextActive: {
-    color: '#FFFFFF',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  weekHeader: {
-    width: 32,
-    alignItems: 'center',
-  },
-  weekHeaderText: {
-    fontSize: 10,
-    color: DARK_THEME.textMuted,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  labelCell: {
-    width: 140,
-    paddingRight: 8,
-  },
-  labelText: {
-    fontSize: 11,
-    color: DARK_THEME.textSecondary,
-  },
-  groupLabelText: {
-    fontSize: 11,
-    color: DARK_THEME.text,
-    fontWeight: '600',
-  },
-  groupCount: {
-    color: DARK_THEME.textMuted,
-    fontWeight: '400',
-  },
-  subLabelCell: {
-    width: 140,
-    paddingRight: 8,
-    paddingLeft: 16,
-  },
-  subLabelText: {
-    fontSize: 10,
-    color: DARK_THEME.textMuted,
-  },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  labelCell: { width: 140, paddingRight: 8 },
+  labelText: { fontSize: 11, color: DARK_THEME.textSecondary },
+  groupLabelText: { fontSize: 11, color: DARK_THEME.text, fontWeight: '600' },
+  groupCount: { color: DARK_THEME.textMuted, fontWeight: '400' },
+  subLabelCell: { width: 140, paddingRight: 8, paddingLeft: 16 },
+  subLabelText: { fontSize: 10, color: DARK_THEME.textMuted },
 });
