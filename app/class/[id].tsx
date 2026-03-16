@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Alert, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { DARK_THEME } from '@/constants/colors';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -16,9 +16,12 @@ export default function ClassDetailScreen() {
   const { classLog, loading } = useClassLog(id);
   const [editing, setEditing] = useState(false);
 
+  const goToMap = () => router.replace('/');
+
   if (loading || !classLog) {
     return (
       <View style={styles.loading}>
+        <Stack.Screen options={{ headerLeft: () => <BackToMap onPress={goToMap} /> }} />
         {loading ? (
           <ActivityIndicator size="large" color={DARK_THEME.accent} />
         ) : (
@@ -50,7 +53,7 @@ export default function ClassDetailScreen() {
             deleteClassLog(db, id);
             incrementDataVersion();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            router.back();
+            router.replace('/');
           },
         },
       ]
@@ -77,6 +80,7 @@ export default function ClassDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <Stack.Screen options={{ headerLeft: () => <BackToMap onPress={goToMap} /> }} />
       <View style={styles.header}>
         <Text style={styles.date}>{formatDate(classLog.date)}</Text>
         {classLog.week_theme ? (
@@ -104,6 +108,14 @@ export default function ClassDetailScreen() {
         </Pressable>
       </View>
     </ScrollView>
+  );
+}
+
+function BackToMap({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={12} style={{ paddingRight: 8 }}>
+      <Text style={{ color: DARK_THEME.accent, fontSize: 16 }}>← Map</Text>
+    </Pressable>
   );
 }
 

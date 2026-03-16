@@ -29,6 +29,7 @@ export default function RootLayout() {
               title: 'Class Details',
               headerStyle: { backgroundColor: '#111827' },
               headerTintColor: '#F9FAFB',
+              headerBackTitle: 'Map',
             }}
           />
         </Stack>
