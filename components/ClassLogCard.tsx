@@ -22,7 +22,7 @@ export function ClassLogCard({ classLog, onPress }: Props) {
       </View>
       <View style={styles.techniques}>
         <TechniqueRow label="Standing" name={classLog.standing_zoom_in_name} />
-        <TechniqueRow label="Guard" name={classLog.guard_name} />
+        <TechniqueRow label="Guard/Pass" name={classLog.guard_name} />
         <TechniqueRow label="Submission" name={classLog.submission_name} />
       </View>
     </Pressable>

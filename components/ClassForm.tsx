@@ -139,6 +139,18 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
           }}
         />
 
+        {/* Guard vs. Pass Follow On */}
+        <Text style={styles.label}>Guard vs. Pass Follow On</Text>
+        <TextInput
+          style={[styles.input, styles.multilineInput]}
+          value={guardZoomInNotes}
+          onChangeText={setGuardZoomInNotes}
+          placeholder="Follow-on details for guard vs. pass..."
+          placeholderTextColor={DARK_THEME.textMuted}
+          multiline
+          numberOfLines={3}
+        />
+
         <TechniquePicker
           category="submission"
           selectedId={submission || null}
@@ -146,18 +158,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
             setSubmission(id);
             setSubmissionName(name);
           }}
-        />
-
-        {/* Guard Zoom-In Notes */}
-        <Text style={styles.label}>Guard Zoom-In Notes</Text>
-        <TextInput
-          style={[styles.input, styles.multilineInput]}
-          value={guardZoomInNotes}
-          onChangeText={setGuardZoomInNotes}
-          placeholder="Specific details about guard work..."
-          placeholderTextColor={DARK_THEME.textMuted}
-          multiline
-          numberOfLines={3}
         />
 
         {/* Notes */}

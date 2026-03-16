@@ -2,7 +2,7 @@ import { Category } from '@/types';
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   standing_zoom_in: 'Standing Zoom-In',
-  guard: 'Guard',
+  guard: 'Guard vs. Pass Focus',
   submission: 'Submission',
 };
 

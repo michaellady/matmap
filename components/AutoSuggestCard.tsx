@@ -16,7 +16,7 @@ export function AutoSuggestCard({ plan, onUsePlan }: Props) {
 
       <View style={styles.techniques}>
         <SuggestionRow label="Standing" name={plan.standing_zoom_in.name} />
-        <SuggestionRow label="Guard" name={plan.guard.name} />
+        <SuggestionRow label="Guard/Pass" name={plan.guard.name} />
         <SuggestionRow label="Submission" name={plan.submission.name} />
       </View>
 

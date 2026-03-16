@@ -85,12 +85,11 @@ export default function ClassDetailScreen() {
       </View>
 
       <DetailRow label="Standing Zoom-In" value={classLog.standing_zoom_in_name} />
-      <DetailRow label="Guard" value={classLog.guard_name} />
-      <DetailRow label="Submission" value={classLog.submission_name} />
-
+      <DetailRow label="Guard vs. Pass Focus" value={classLog.guard_name} />
       {classLog.guard_zoom_in_notes ? (
-        <DetailRow label="Guard Zoom-In Notes" value={classLog.guard_zoom_in_notes} />
+        <DetailRow label="Guard vs. Pass Follow On" value={classLog.guard_zoom_in_notes} />
       ) : null}
+      <DetailRow label="Submission" value={classLog.submission_name} />
 
       {classLog.notes ? (
         <DetailRow label="Notes" value={classLog.notes} />
