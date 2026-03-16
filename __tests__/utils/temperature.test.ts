@@ -21,8 +21,10 @@ describe('calculateTemperatureScore', () => {
     expect(score).toBeCloseTo(7.7, 0);
   });
 
-  it('scores ~5.1 for guard taught at expected rate, 21 days ago', () => {
-    const score = calculateTemperatureScore(2.67, 21, 'guard');
+  it('scores ~5 for guard taught at expected rate, 21 days ago', () => {
+    // expectedFreq = 16/7 = 2.29, ratio = 2.29/2.29 = 1.0, recency = 10-7 = 3
+    // score = 3.0 + 2.1 = 5.1 (with 7 guard techniques)
+    const score = calculateTemperatureScore(16 / 7, 21, 'guard');
     expect(score).toBeCloseTo(5.1, 0);
   });
 

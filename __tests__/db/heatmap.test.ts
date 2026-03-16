@@ -30,14 +30,14 @@ describe('getTechniqueTemperatures', () => {
     const db = createSeededTestDb();
     insertTestClasses(db);
     const temps = getTechniqueTemperatures(db, undefined, '2026-03-14');
-    expect(temps).toHaveLength(25);
+    expect(temps).toHaveLength(26);
   });
 
   it('returns temperatures filtered by category', () => {
     const db = createSeededTestDb();
     insertTestClasses(db);
     const temps = getTechniqueTemperatures(db, 'guard', '2026-03-14');
-    expect(temps).toHaveLength(6);
+    expect(temps).toHaveLength(7);
     temps.forEach((t) => expect(t.category).toBe('guard'));
   });
 
@@ -100,7 +100,7 @@ describe('getColdSpots', () => {
     const db = createSeededTestDb();
     insertTestClasses(db);
     const spots = getColdSpots(db, '2026-03-14');
-    expect(spots).toHaveLength(25);
+    expect(spots).toHaveLength(26);
   });
 
   it('includes temperature score and color', () => {

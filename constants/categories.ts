@@ -11,7 +11,7 @@ export const CATEGORIES: Category[] = ['standing', 'guard', 'pinning', 'submissi
 
 export const CATEGORY_COUNTS: Record<Category, number> = {
   standing: 10,
-  guard: 6,
+  guard: 7,
   pinning: 3,
   submission: 6,
 };

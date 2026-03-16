@@ -21,7 +21,7 @@ describe('techniques', () => {
   it('returns 6 guard techniques', () => {
     const db = createSeededTestDb();
     const techniques = getTechniquesByCategory(db, 'guard');
-    expect(techniques).toHaveLength(6);
+    expect(techniques).toHaveLength(7);
     techniques.forEach((t) => expect(t.category).toBe('guard'));
   });
 
@@ -49,7 +49,7 @@ describe('techniques', () => {
   it('returns all active techniques', () => {
     const db = createSeededTestDb();
     const all = getAllTechniques(db);
-    expect(all).toHaveLength(25);
+    expect(all).toHaveLength(26);
   });
 
   it('creates a new technique', () => {
@@ -72,7 +72,7 @@ describe('techniques', () => {
     const db = createSeededTestDb();
     deleteTechnique(db, 'test-id-0001');
     const all = getAllTechniques(db);
-    expect(all).toHaveLength(24);
+    expect(all).toHaveLength(25);
     const t = getTechniqueById(db, 'test-id-0001');
     expect(t).toBeDefined();
     expect(t!.deleted_at).not.toBeNull();
