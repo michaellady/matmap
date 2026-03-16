@@ -1,29 +1,31 @@
 import { Database } from './interface';
-import { ClassLog, ClassLogWithTechniques } from '@/types';
+import { ClassLogWithTechniques } from '@/types';
 
 export interface CreateClassLogParams {
   id: string;
   date: string;
   week_theme: string;
-  standing_zoom_in: string;
+  standing: string;
   guard: string;
+  pinning: string | null;
   submission: string;
-  guard_zoom_in_notes: string;
+  guard_notes: string;
   notes: string;
 }
 
 export function createClassLog(db: Database, params: CreateClassLogParams): void {
   db.run(
-    `INSERT INTO class_log (id, date, week_theme, standing_zoom_in, guard, submission, guard_zoom_in_notes, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO class_log (id, date, week_theme, standing, guard, pinning, submission, guard_notes, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       params.id,
       params.date,
       params.week_theme,
-      params.standing_zoom_in,
+      params.standing,
       params.guard,
+      params.pinning,
       params.submission,
-      params.guard_zoom_in_notes,
+      params.guard_notes,
       params.notes,
     ]
   );
@@ -32,13 +34,15 @@ export function createClassLog(db: Database, params: CreateClassLogParams): void
 export function getAllClassLogs(db: Database): ClassLogWithTechniques[] {
   return db.all<ClassLogWithTechniques>(
     `SELECT cl.*,
-       t1.name as standing_zoom_in_name,
+       t1.name as standing_name,
        t2.name as guard_name,
-       t3.name as submission_name
+       t3.name as pinning_name,
+       t4.name as submission_name
      FROM class_log cl
-     JOIN technique t1 ON cl.standing_zoom_in = t1.id
+     JOIN technique t1 ON cl.standing = t1.id
      JOIN technique t2 ON cl.guard = t2.id
-     JOIN technique t3 ON cl.submission = t3.id
+     LEFT JOIN technique t3 ON cl.pinning = t3.id
+     JOIN technique t4 ON cl.submission = t4.id
      ORDER BY cl.date DESC`
   );
 }
@@ -46,13 +50,15 @@ export function getAllClassLogs(db: Database): ClassLogWithTechniques[] {
 export function getClassLogById(db: Database, id: string): ClassLogWithTechniques | undefined {
   return db.get<ClassLogWithTechniques>(
     `SELECT cl.*,
-       t1.name as standing_zoom_in_name,
+       t1.name as standing_name,
        t2.name as guard_name,
-       t3.name as submission_name
+       t3.name as pinning_name,
+       t4.name as submission_name
      FROM class_log cl
-     JOIN technique t1 ON cl.standing_zoom_in = t1.id
+     JOIN technique t1 ON cl.standing = t1.id
      JOIN technique t2 ON cl.guard = t2.id
-     JOIN technique t3 ON cl.submission = t3.id
+     LEFT JOIN technique t3 ON cl.pinning = t3.id
+     JOIN technique t4 ON cl.submission = t4.id
      WHERE cl.id = ?`,
     [id]
   );
@@ -65,17 +71,18 @@ export function updateClassLog(
 ): void {
   db.run(
     `UPDATE class_log SET
-       date = ?, week_theme = ?, standing_zoom_in = ?, guard = ?,
-       submission = ?, guard_zoom_in_notes = ?, notes = ?,
+       date = ?, week_theme = ?, standing = ?, guard = ?,
+       pinning = ?, submission = ?, guard_notes = ?, notes = ?,
        updated_at = datetime('now')
      WHERE id = ?`,
     [
       params.date,
       params.week_theme,
-      params.standing_zoom_in,
+      params.standing,
       params.guard,
+      params.pinning,
       params.submission,
-      params.guard_zoom_in_notes,
+      params.guard_notes,
       params.notes,
       id,
     ]

@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import * as Crypto from 'expo-crypto';
+import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ClassForm, ClassFormData } from '@/components/ClassForm';
 import { useDatabase } from '@/hooks/useDatabase';
 import { createClassLog } from '@/db/classLogs';
 import { DARK_THEME } from '@/constants/colors';
 
+function generateId(): string {
+  if (Platform.OS === 'web') return crypto.randomUUID();
+  const Crypto = require('expo-crypto');
+  return Crypto.randomUUID();
+}
+
 export default function PlanClassScreen() {
   const { db, incrementDataVersion } = useDatabase();
   const params = useLocalSearchParams<{
-    standing_zoom_in?: string;
+    standing?: string;
     guard?: string;
+    pinning?: string;
     submission?: string;
   }>();
   const [resetCount, setResetCount] = useState(0);
 
-  const paramsKey = `${params.standing_zoom_in}-${params.guard}-${params.submission}`;
-  const initialData = params.standing_zoom_in
+  const paramsKey = `${params.standing}-${params.guard}-${params.pinning}-${params.submission}`;
+  const initialData = params.standing
     ? {
-        standing_zoom_in: params.standing_zoom_in,
+        standing: params.standing,
         guard: params.guard,
+        pinning: params.pinning || null,
         submission: params.submission,
       }
     : undefined;
@@ -28,7 +35,7 @@ export default function PlanClassScreen() {
   const handleSubmit = (data: ClassFormData) => {
     if (!db) return;
 
-    const id = Crypto.randomUUID();
+    const id = generateId();
     createClassLog(db, { id, ...data });
     incrementDataVersion();
     router.push(`/class/${id}`);

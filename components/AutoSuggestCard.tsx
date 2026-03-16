@@ -15,8 +15,9 @@ export function AutoSuggestCard({ plan, onUsePlan }: Props) {
       <Text style={styles.subtitle}>Based on what you haven't covered recently</Text>
 
       <View style={styles.techniques}>
-        <SuggestionRow label="Standing" name={plan.standing_zoom_in.name} />
-        <SuggestionRow label="Guard/Pass" name={plan.guard.name} />
+        <SuggestionRow label="Standing" name={plan.standing.name} />
+        <SuggestionRow label="Guard" name={plan.guard.name} />
+        {plan.pinning && <SuggestionRow label="Pinning" name={plan.pinning.name} />}
         <SuggestionRow label="Submission" name={plan.submission.name} />
       </View>
 
@@ -31,61 +32,22 @@ function SuggestionRow({ label, name }: { label: string; name: string }) {
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowName} numberOfLines={2}>
-        {name}
-      </Text>
+      <Text style={styles.rowName} numberOfLines={2}>{name}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: DARK_THEME.surface,
-    borderRadius: 12,
-    padding: 16,
-    margin: 16,
-    borderWidth: 1,
-    borderColor: DARK_THEME.accent,
+    backgroundColor: DARK_THEME.surface, borderRadius: 12, padding: 16, margin: 16,
+    borderWidth: 1, borderColor: DARK_THEME.accent,
   },
-  title: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: DARK_THEME.text,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: DARK_THEME.textSecondary,
-    marginTop: 2,
-    marginBottom: 14,
-  },
-  techniques: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  rowLabel: {
-    fontSize: 13,
-    color: DARK_THEME.textMuted,
-    width: 72,
-    fontWeight: '500',
-  },
-  rowName: {
-    fontSize: 14,
-    color: DARK_THEME.text,
-    flex: 1,
-  },
-  button: {
-    backgroundColor: DARK_THEME.accent,
-    borderRadius: 10,
-    padding: 14,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+  title: { fontSize: 17, fontWeight: '700', color: DARK_THEME.text },
+  subtitle: { fontSize: 13, color: DARK_THEME.textSecondary, marginTop: 2, marginBottom: 14 },
+  techniques: { gap: 8, marginBottom: 16 },
+  row: { flexDirection: 'row', gap: 10 },
+  rowLabel: { fontSize: 13, color: DARK_THEME.textMuted, width: 72, fontWeight: '500' },
+  rowName: { fontSize: 14, color: DARK_THEME.text, flex: 1 },
+  button: { backgroundColor: DARK_THEME.accent, borderRadius: 10, padding: 14, alignItems: 'center' },
+  buttonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });

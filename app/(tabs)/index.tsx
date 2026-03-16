@@ -24,8 +24,9 @@ export default function MapScreen() {
     router.push({
       pathname: '/(tabs)/plan' as any,
       params: {
-        standing_zoom_in: plan.standing_zoom_in.id,
+        standing: plan.standing.id,
         guard: plan.guard.id,
+        pinning: plan.pinning?.id ?? '',
         submission: plan.submission.id,
       },
     });

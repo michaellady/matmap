@@ -23,10 +23,10 @@ describe('migrations', () => {
     expect(result?.count).toBe(22);
   });
 
-  it('seeds 10 standing_zoom_in techniques', () => {
+  it('seeds 10 standing techniques', () => {
     const db = createSeededTestDb();
     const result = db.get<{ count: number }>(
-      "SELECT COUNT(*) as count FROM technique WHERE category = 'standing_zoom_in'"
+      "SELECT COUNT(*) as count FROM technique WHERE category = 'standing'"
     );
     expect(result?.count).toBe(10);
   });
@@ -49,7 +49,6 @@ describe('migrations', () => {
 
   it('does not re-seed if techniques already exist', () => {
     const db = createSeededTestDb();
-    // Try seeding again
     const { seedTechniques } = require('../../db/migrations');
     seedTechniques(db, () => 'extra-id');
     const result = db.get<{ count: number }>('SELECT COUNT(*) as count FROM technique');

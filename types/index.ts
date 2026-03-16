@@ -1,4 +1,4 @@
-export type Category = 'standing_zoom_in' | 'guard' | 'submission';
+export type Category = 'standing' | 'guard' | 'pinning' | 'submission';
 
 export interface Technique {
   id: string;
@@ -12,10 +12,11 @@ export interface ClassLog {
   id: string;
   date: string;
   week_theme: string;
-  standing_zoom_in: string;
+  standing: string;
   guard: string;
+  pinning: string | null;
   submission: string;
-  guard_zoom_in_notes: string;
+  guard_notes: string;
   notes: string;
   created_at: string;
   updated_at: string;
@@ -49,13 +50,15 @@ export interface ColdSpot {
 }
 
 export interface SuggestedPlan {
-  standing_zoom_in: Technique;
+  standing: Technique;
   guard: Technique;
+  pinning: Technique | null;
   submission: Technique;
 }
 
 export interface ClassLogWithTechniques extends ClassLog {
-  standing_zoom_in_name: string;
+  standing_name: string;
   guard_name: string;
+  pinning_name: string | null;
   submission_name: string;
 }

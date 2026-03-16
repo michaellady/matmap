@@ -9,7 +9,13 @@ export function calculateTemperatureScore(
   daysSinceLastTaught: number | null,
   category: Category
 ): number {
-  const expectedFreq = CLASSES_IN_8_WEEKS / CATEGORY_COUNTS[category];
+  const count = CATEGORY_COUNTS[category];
+  if (count === 0) {
+    // No expected frequency for empty categories — use recency only
+    const recency = daysSinceLastTaught === null ? 0 : Math.max(0, 10 - daysSinceLastTaught / 3);
+    return Math.min(Math.max(recency * 0.7, 0), 10);
+  }
+  const expectedFreq = CLASSES_IN_8_WEEKS / count;
   const frequencyRatio = Math.min(frequency8wk / expectedFreq, 2);
 
   let recencyScore: number;

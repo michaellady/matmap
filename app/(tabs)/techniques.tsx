@@ -31,7 +31,7 @@ export default function TechniquesScreen() {
   const { techniques } = useTechniques();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingCategory, setEditingCategory] = useState<Category>('standing_zoom_in');
+  const [editingCategory, setEditingCategory] = useState<Category>('standing');
   const [techniqueName, setTechniqueName] = useState('');
 
   const sections = CATEGORIES.map((cat) => ({

@@ -1,7 +1,8 @@
 import { Database } from './interface';
 import { Category, ColdSpot, SuggestedPlan, Technique } from '@/types';
 import { calculateTemperatureScore, temperatureToColor } from '@/utils/temperature';
-import { CATEGORIES } from '@/constants/categories';
+
+const TECHNIQUE_JOIN = '(t.id = cl.standing OR t.id = cl.guard OR t.id = cl.pinning OR t.id = cl.submission)';
 
 export interface TechniqueTemperature {
   id: string;
@@ -34,7 +35,7 @@ export function getTechniqueTemperatures(
          ELSE NULL
        END as days_since
      FROM technique t
-     LEFT JOIN class_log cl ON (t.id = cl.standing_zoom_in OR t.id = cl.guard OR t.id = cl.submission)
+     LEFT JOIN class_log cl ON ${TECHNIQUE_JOIN}
      WHERE t.deleted_at IS NULL ${categoryClause}
      GROUP BY t.id
      ORDER BY t.category, t.name`,
@@ -56,7 +57,7 @@ export function getWeeklyFrequency(db: Database, days: number): WeeklyFrequency[
        date(cl.date, 'weekday 0', '-6 days') AS week_start,
        COUNT(*) AS count
      FROM class_log cl
-     JOIN technique t ON (t.id = cl.standing_zoom_in OR t.id = cl.guard OR t.id = cl.submission)
+     JOIN technique t ON ${TECHNIQUE_JOIN}
      WHERE cl.date >= date('now', '-' || ? || ' days')
        AND t.deleted_at IS NULL
      GROUP BY t.id, week_start
@@ -89,7 +90,7 @@ export function getColdSpots(db: Database, referenceDate?: string): ColdSpot[] {
        END as days_since,
        COUNT(CASE WHEN cl.date >= ${eightWeeksAgo} THEN 1 END) as frequency_8wk
      FROM technique t
-     LEFT JOIN class_log cl ON (t.id = cl.standing_zoom_in OR t.id = cl.guard OR t.id = cl.submission)
+     LEFT JOIN class_log cl ON ${TECHNIQUE_JOIN}
      WHERE t.deleted_at IS NULL
      GROUP BY t.id
      ORDER BY last_taught ASC NULLS FIRST, total_count ASC`
@@ -114,11 +115,12 @@ export function getSuggestedPlan(db: Database, referenceDate?: string): Suggeste
     return { id: spot.id, name: spot.name, category: spot.category, created_at: '', deleted_at: null };
   };
 
-  const standing = findColdest('standing_zoom_in');
+  const standing = findColdest('standing');
   const guard = findColdest('guard');
+  const pinning = findColdest('pinning') ?? null;
   const submission = findColdest('submission');
 
   if (!standing || !guard || !submission) return null;
 
-  return { standing_zoom_in: standing, guard, submission };
+  return { standing, guard, pinning, submission };
 }

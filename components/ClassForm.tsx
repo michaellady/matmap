@@ -19,10 +19,11 @@ import { toDateString } from '@/utils/dates';
 export interface ClassFormData {
   date: string;
   week_theme: string;
-  standing_zoom_in: string;
+  standing: string;
   guard: string;
+  pinning: string | null;
   submission: string;
-  guard_zoom_in_notes: string;
+  guard_notes: string;
   notes: string;
 }
 
@@ -44,15 +45,11 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
     initialData?.date ? new Date(initialData.date + 'T12:00:00') : new Date()
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [standingZoomIn, setStandingZoomIn] = useState(initialData?.standing_zoom_in ?? '');
-  const [standingZoomInName, setStandingZoomInName] = useState('');
+  const [standing, setStanding] = useState(initialData?.standing ?? '');
   const [guard, setGuard] = useState(initialData?.guard ?? '');
-  const [guardName, setGuardName] = useState('');
+  const [pinning, setPinning] = useState(initialData?.pinning ?? '');
   const [submission, setSubmission] = useState(initialData?.submission ?? '');
-  const [submissionName, setSubmissionName] = useState('');
-  const [guardZoomInNotes, setGuardZoomInNotes] = useState(
-    initialData?.guard_zoom_in_notes ?? ''
-  );
+  const [guardNotes, setGuardNotes] = useState(initialData?.guard_notes ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
 
   const handleDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -63,8 +60,8 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
   };
 
   const handleSubmit = () => {
-    if (!standingZoomIn || !guard || !submission) {
-      Alert.alert('Missing selections', 'Please select a technique for each category.');
+    if (!standing || !guard || !submission) {
+      Alert.alert('Missing selections', 'Please select a technique for Standing, Guard, and Submission.');
       return;
     }
 
@@ -72,10 +69,11 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
     onSubmit({
       date: toDateString(date),
       week_theme: '',
-      standing_zoom_in: standingZoomIn,
+      standing,
       guard,
+      pinning: pinning || null,
       submission,
-      guard_zoom_in_notes: guardZoomInNotes,
+      guard_notes: guardNotes,
       notes,
     });
   };
@@ -120,44 +118,44 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
           />
         )}
 
-        {/* Technique Pickers */}
+        {/* Standing */}
         <TechniquePicker
-          category="standing_zoom_in"
-          selectedId={standingZoomIn || null}
-          onSelect={(id, name) => {
-            setStandingZoomIn(id);
-            setStandingZoomInName(name);
-          }}
+          category="standing"
+          selectedId={standing || null}
+          onSelect={(id) => setStanding(id)}
         />
 
+        {/* Guard vs. Passing */}
         <TechniquePicker
           category="guard"
           selectedId={guard || null}
-          onSelect={(id, name) => {
-            setGuard(id);
-            setGuardName(name);
-          }}
+          onSelect={(id) => setGuard(id)}
         />
 
-        {/* Guard vs. Pass Follow On */}
+        {/* Guard Notes */}
         <Text style={styles.label}>Guard vs. Pass Follow On</Text>
         <TextInput
           style={[styles.input, styles.multilineInput]}
-          value={guardZoomInNotes}
-          onChangeText={setGuardZoomInNotes}
+          value={guardNotes}
+          onChangeText={setGuardNotes}
           placeholder="Follow-on details for guard vs. pass..."
           placeholderTextColor={DARK_THEME.textMuted}
           multiline
           numberOfLines={3}
         />
 
+        {/* Pinning */}
+        <TechniquePicker
+          category="pinning"
+          selectedId={pinning || null}
+          onSelect={(id) => setPinning(id)}
+        />
+
+        {/* Submission */}
         <TechniquePicker
           category="submission"
           selectedId={submission || null}
-          onSelect={(id, name) => {
-            setSubmission(id);
-            setSubmissionName(name);
-          }}
+          onSelect={(id) => setSubmission(id)}
         />
 
         {/* Notes */}
@@ -184,85 +182,28 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: DARK_THEME.background,
-  },
-  content: {
-    padding: 16,
-  },
+  flex: { flex: 1 },
+  container: { flex: 1, backgroundColor: DARK_THEME.background },
+  content: { padding: 16 },
   winConditionsCard: {
-    backgroundColor: DARK_THEME.surface,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: DARK_THEME.border,
-    marginBottom: 8,
+    backgroundColor: DARK_THEME.surface, borderRadius: 12, padding: 16,
+    borderWidth: 1, borderColor: DARK_THEME.border, marginBottom: 8,
   },
-  winConditionsTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: DARK_THEME.text,
-    marginBottom: 4,
-  },
-  winConditionsSubtitle: {
-    fontSize: 13,
-    color: DARK_THEME.textSecondary,
-    marginBottom: 8,
-  },
-  winConditionItem: {
-    fontSize: 13,
-    color: DARK_THEME.textSecondary,
-    marginBottom: 2,
-    paddingLeft: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: DARK_THEME.textSecondary,
-    marginBottom: 6,
-    marginTop: 16,
-  },
+  winConditionsTitle: { fontSize: 15, fontWeight: '700', color: DARK_THEME.text, marginBottom: 4 },
+  winConditionsSubtitle: { fontSize: 13, color: DARK_THEME.textSecondary, marginBottom: 8 },
+  winConditionItem: { fontSize: 13, color: DARK_THEME.textSecondary, marginBottom: 2, paddingLeft: 4 },
+  label: { fontSize: 14, fontWeight: '600', color: DARK_THEME.textSecondary, marginBottom: 6, marginTop: 16 },
   dateSelector: {
-    backgroundColor: DARK_THEME.surface,
-    borderRadius: 10,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: DARK_THEME.border,
+    backgroundColor: DARK_THEME.surface, borderRadius: 10, padding: 14,
+    borderWidth: 1, borderColor: DARK_THEME.border,
   },
-  dateText: {
-    fontSize: 16,
-    color: DARK_THEME.text,
-  },
+  dateText: { fontSize: 16, color: DARK_THEME.text },
   input: {
-    backgroundColor: DARK_THEME.surface,
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    color: DARK_THEME.text,
-    borderWidth: 1,
-    borderColor: DARK_THEME.border,
+    backgroundColor: DARK_THEME.surface, borderRadius: 10, padding: 14, fontSize: 16,
+    color: DARK_THEME.text, borderWidth: 1, borderColor: DARK_THEME.border,
   },
-  multilineInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  submitButton: {
-    backgroundColor: DARK_THEME.accent,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  submitText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  bottomSpacer: {
-    height: 40,
-  },
+  multilineInput: { minHeight: 80, textAlignVertical: 'top' },
+  submitButton: { backgroundColor: DARK_THEME.accent, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 24 },
+  submitText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  bottomSpacer: { height: 40 },
 });

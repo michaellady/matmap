@@ -11,11 +11,11 @@ import {
 import { createClassLog } from '../../db/classLogs';
 
 describe('techniques', () => {
-  it('returns 10 standing_zoom_in techniques', () => {
+  it('returns 10 standing techniques', () => {
     const db = createSeededTestDb();
-    const techniques = getTechniquesByCategory(db, 'standing_zoom_in');
+    const techniques = getTechniquesByCategory(db, 'standing');
     expect(techniques).toHaveLength(10);
-    techniques.forEach((t) => expect(t.category).toBe('standing_zoom_in'));
+    techniques.forEach((t) => expect(t.category).toBe('standing'));
   });
 
   it('returns 6 guard techniques', () => {
@@ -32,11 +32,17 @@ describe('techniques', () => {
     techniques.forEach((t) => expect(t.category).toBe('submission'));
   });
 
+  it('returns 0 pinning techniques (none seeded)', () => {
+    const db = createSeededTestDb();
+    const techniques = getTechniquesByCategory(db, 'pinning');
+    expect(techniques).toHaveLength(0);
+  });
+
   it('returns a technique by ID', () => {
     const db = createSeededTestDb();
     const technique = getTechniqueById(db, 'test-id-0001');
     expect(technique).toBeDefined();
-    expect(technique!.category).toBe('standing_zoom_in');
+    expect(technique!.category).toBe('standing');
   });
 
   it('returns all active techniques', () => {
@@ -47,11 +53,11 @@ describe('techniques', () => {
 
   it('creates a new technique', () => {
     const db = createSeededTestDb();
-    createTechnique(db, 'new-id', 'Ankle Pick', 'standing_zoom_in');
+    createTechnique(db, 'new-id', 'Side control → mount', 'pinning');
     const t = getTechniqueById(db, 'new-id');
     expect(t).toBeDefined();
-    expect(t!.name).toBe('Ankle Pick');
-    expect(t!.category).toBe('standing_zoom_in');
+    expect(t!.name).toBe('Side control → mount');
+    expect(t!.category).toBe('pinning');
   });
 
   it('updates a technique name', () => {
@@ -66,7 +72,6 @@ describe('techniques', () => {
     deleteTechnique(db, 'test-id-0001');
     const all = getAllTechniques(db);
     expect(all).toHaveLength(21);
-    // But still findable by ID
     const t = getTechniqueById(db, 'test-id-0001');
     expect(t).toBeDefined();
     expect(t!.deleted_at).not.toBeNull();
@@ -74,18 +79,17 @@ describe('techniques', () => {
 
   it('gets usage count for a technique', () => {
     const db = createSeededTestDb();
-    // No usage initially
     expect(getTechniqueUsageCount(db, 'test-id-0001')).toBe(0);
 
-    // Create a class log using the technique
     createClassLog(db, {
       id: 'cl-1',
       date: '2026-03-01',
-      week_theme: 'Test',
-      standing_zoom_in: 'test-id-0001',
+      week_theme: '',
+      standing: 'test-id-0001',
       guard: 'test-id-0011',
+      pinning: null,
       submission: 'test-id-0017',
-      guard_zoom_in_notes: '',
+      guard_notes: '',
       notes: '',
     });
 

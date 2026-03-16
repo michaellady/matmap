@@ -38,8 +38,8 @@ export function deleteTechnique(db: Database, id: string): void {
 export function getTechniqueUsageCount(db: Database, id: string): number {
   const result = db.get<{ count: number }>(
     `SELECT COUNT(*) as count FROM class_log
-     WHERE standing_zoom_in = ? OR guard = ? OR submission = ?`,
-    [id, id, id]
+     WHERE standing = ? OR guard = ? OR pinning = ? OR submission = ?`,
+    [id, id, id, id]
   );
   return result?.count ?? 0;
 }

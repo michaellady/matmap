@@ -12,11 +12,12 @@ describe('classLogs', () => {
     createClassLog(db, {
       id: 'cl-1',
       date: '2026-03-10',
-      week_theme: 'Front headlock week',
-      standing_zoom_in: 'test-id-0001',
+      week_theme: '',
+      standing: 'test-id-0001',
       guard: 'test-id-0011',
+      pinning: null,
       submission: 'test-id-0017',
-      guard_zoom_in_notes: 'Focus on underhook recovery',
+      guard_notes: 'Focus on underhook recovery',
       notes: 'Good class, 12 students',
     });
   }
@@ -29,11 +30,11 @@ describe('classLogs', () => {
     expect(log).toBeDefined();
     expect(log!.id).toBe('cl-1');
     expect(log!.date).toBe('2026-03-10');
-    expect(log!.week_theme).toBe('Front headlock week');
-    expect(log!.standing_zoom_in).toBe('test-id-0001');
+    expect(log!.standing).toBe('test-id-0001');
     expect(log!.guard).toBe('test-id-0011');
+    expect(log!.pinning).toBeNull();
     expect(log!.submission).toBe('test-id-0017');
-    expect(log!.guard_zoom_in_notes).toBe('Focus on underhook recovery');
+    expect(log!.guard_notes).toBe('Focus on underhook recovery');
     expect(log!.notes).toBe('Good class, 12 students');
   });
 
@@ -42,7 +43,7 @@ describe('classLogs', () => {
     seedClassLog(db);
 
     const log = getClassLogById(db, 'cl-1');
-    expect(log!.standing_zoom_in_name).toBeDefined();
+    expect(log!.standing_name).toBeDefined();
     expect(log!.guard_name).toBeDefined();
     expect(log!.submission_name).toBeDefined();
   });
@@ -53,11 +54,12 @@ describe('classLogs', () => {
     createClassLog(db, {
       id: 'cl-2',
       date: '2026-03-12',
-      week_theme: 'Takedown week',
-      standing_zoom_in: 'test-id-0004',
+      week_theme: '',
+      standing: 'test-id-0004',
       guard: 'test-id-0012',
+      pinning: null,
       submission: 'test-id-0018',
-      guard_zoom_in_notes: '',
+      guard_notes: '',
       notes: '',
     });
 
@@ -73,19 +75,19 @@ describe('classLogs', () => {
 
     updateClassLog(db, 'cl-1', {
       date: '2026-03-11',
-      week_theme: 'Updated theme',
-      standing_zoom_in: 'test-id-0002',
+      week_theme: '',
+      standing: 'test-id-0002',
       guard: 'test-id-0011',
+      pinning: null,
       submission: 'test-id-0017',
-      guard_zoom_in_notes: 'Updated notes',
+      guard_notes: 'Updated notes',
       notes: 'Updated general notes',
     });
 
     const log = getClassLogById(db, 'cl-1');
     expect(log!.date).toBe('2026-03-11');
-    expect(log!.week_theme).toBe('Updated theme');
-    expect(log!.standing_zoom_in).toBe('test-id-0002');
-    expect(log!.guard_zoom_in_notes).toBe('Updated notes');
+    expect(log!.standing).toBe('test-id-0002');
+    expect(log!.guard_notes).toBe('Updated notes');
   });
 
   it('deletes a class log', () => {

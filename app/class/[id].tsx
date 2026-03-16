@@ -8,7 +8,6 @@ import { useClassLog } from '@/hooks/useClassLogs';
 import { updateClassLog, deleteClassLog } from '@/db/classLogs';
 import { ClassForm, ClassFormData } from '@/components/ClassForm';
 import { formatDate } from '@/utils/dates';
-import { CATEGORY_LABELS } from '@/constants/categories';
 
 export default function ClassDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -36,28 +35,23 @@ export default function ClassDetailScreen() {
     updateClassLog(db, id, data);
     incrementDataVersion();
     setEditing(false);
-    Alert.alert('Updated', 'Class updated successfully.');
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Class',
-      'Are you sure you want to delete this class log? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            if (!db || !id) return;
-            deleteClassLog(db, id);
-            incrementDataVersion();
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            router.replace('/');
-          },
+    Alert.alert('Delete Class', 'Are you sure? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          if (!db || !id) return;
+          deleteClassLog(db, id);
+          incrementDataVersion();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          router.replace('/');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (editing) {
@@ -65,11 +59,11 @@ export default function ClassDetailScreen() {
       <ClassForm
         initialData={{
           date: classLog.date,
-          week_theme: classLog.week_theme,
-          standing_zoom_in: classLog.standing_zoom_in,
+          standing: classLog.standing,
           guard: classLog.guard,
+          pinning: classLog.pinning,
           submission: classLog.submission,
-          guard_zoom_in_notes: classLog.guard_zoom_in_notes,
+          guard_notes: classLog.guard_notes,
           notes: classLog.notes,
         }}
         onSubmit={handleUpdate}
@@ -83,21 +77,19 @@ export default function ClassDetailScreen() {
       <Stack.Screen options={{ headerLeft: () => <BackToMap onPress={goToMap} /> }} />
       <View style={styles.header}>
         <Text style={styles.date}>{formatDate(classLog.date)}</Text>
-        {classLog.week_theme ? (
-          <Text style={styles.theme}>{classLog.week_theme}</Text>
-        ) : null}
       </View>
 
-      <DetailRow label="Standing Zoom-In" value={classLog.standing_zoom_in_name} />
-      <DetailRow label="Guard vs. Pass Focus" value={classLog.guard_name} />
-      {classLog.guard_zoom_in_notes ? (
-        <DetailRow label="Guard vs. Pass Follow On" value={classLog.guard_zoom_in_notes} />
+      <DetailRow label="Standing" value={classLog.standing_name} />
+      <DetailRow label="Guard vs. Passing" value={classLog.guard_name} />
+      {classLog.guard_notes ? (
+        <DetailRow label="Guard Follow On" value={classLog.guard_notes} />
+      ) : null}
+      {classLog.pinning_name ? (
+        <DetailRow label="Pinning" value={classLog.pinning_name} />
       ) : null}
       <DetailRow label="Submission" value={classLog.submission_name} />
 
-      {classLog.notes ? (
-        <DetailRow label="Notes" value={classLog.notes} />
-      ) : null}
+      {classLog.notes ? <DetailRow label="Notes" value={classLog.notes} /> : null}
 
       <View style={styles.actions}>
         <Pressable style={styles.editButton} onPress={() => setEditing(true)}>
@@ -129,76 +121,20 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: DARK_THEME.background,
-    padding: 16,
-  },
-  loading: {
-    flex: 1,
-    backgroundColor: DARK_THEME.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    color: DARK_THEME.textSecondary,
-    fontSize: 16,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  date: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: DARK_THEME.text,
-  },
-  theme: {
-    fontSize: 15,
-    color: DARK_THEME.accent,
-    marginTop: 4,
-  },
-  detailRow: {
-    marginBottom: 16,
-  },
-  detailLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: DARK_THEME.textMuted,
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: DARK_THEME.text,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-  },
-  editButton: {
-    flex: 1,
-    backgroundColor: DARK_THEME.accent,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-  },
-  editButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: DARK_THEME.background, padding: 16 },
+  loading: { flex: 1, backgroundColor: DARK_THEME.background, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { color: DARK_THEME.textSecondary, fontSize: 16 },
+  header: { marginBottom: 20 },
+  date: { fontSize: 22, fontWeight: '700', color: DARK_THEME.text },
+  detailRow: { marginBottom: 16 },
+  detailLabel: { fontSize: 13, fontWeight: '600', color: DARK_THEME.textMuted, marginBottom: 4 },
+  detailValue: { fontSize: 16, color: DARK_THEME.text },
+  actions: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  editButton: { flex: 1, backgroundColor: DARK_THEME.accent, borderRadius: 12, padding: 14, alignItems: 'center' },
+  editButtonText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
   deleteButton: {
-    flex: 1,
-    backgroundColor: DARK_THEME.surface,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: DARK_THEME.danger,
+    flex: 1, backgroundColor: DARK_THEME.surface, borderRadius: 12, padding: 14,
+    alignItems: 'center', borderWidth: 1, borderColor: DARK_THEME.danger,
   },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: DARK_THEME.danger,
-  },
+  deleteButtonText: { fontSize: 16, fontWeight: '700', color: DARK_THEME.danger },
 });
