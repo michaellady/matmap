@@ -44,7 +44,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
     initialData?.date ? new Date(initialData.date + 'T12:00:00') : new Date()
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [weekTheme, setWeekTheme] = useState(initialData?.week_theme ?? '');
   const [standingZoomIn, setStandingZoomIn] = useState(initialData?.standing_zoom_in ?? '');
   const [standingZoomInName, setStandingZoomInName] = useState('');
   const [guard, setGuard] = useState(initialData?.guard ?? '');
@@ -72,7 +71,7 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onSubmit({
       date: toDateString(date),
-      week_theme: weekTheme,
+      week_theme: '',
       standing_zoom_in: standingZoomIn,
       guard,
       submission,
@@ -120,16 +119,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
             themeVariant="dark"
           />
         )}
-
-        {/* Week Theme */}
-        <Text style={styles.label}>Week Theme</Text>
-        <TextInput
-          style={styles.input}
-          value={weekTheme}
-          onChangeText={setWeekTheme}
-          placeholder="e.g., Front headlock week"
-          placeholderTextColor={DARK_THEME.textMuted}
-        />
 
         {/* Technique Pickers */}
         <TechniquePicker

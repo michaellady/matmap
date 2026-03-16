@@ -21,15 +21,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Plan Class',
-          tabBarLabel: 'Plan',
+          title: 'The Map',
+          tabBarLabel: 'Map',
         }}
       />
       <Tabs.Screen
-        name="map"
+        name="plan"
         options={{
-          title: 'The Map',
-          tabBarLabel: 'Map',
+          title: 'Plan Class',
+          tabBarLabel: 'Plan',
         }}
       />
       <Tabs.Screen
