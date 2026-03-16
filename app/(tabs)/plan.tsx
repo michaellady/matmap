@@ -14,8 +14,9 @@ export default function PlanClassScreen() {
     guard?: string;
     submission?: string;
   }>();
-  const [key, setKey] = useState(0);
+  const [resetCount, setResetCount] = useState(0);
 
+  const paramsKey = `${params.standing_zoom_in}-${params.guard}-${params.submission}`;
   const initialData = params.standing_zoom_in
     ? {
         standing_zoom_in: params.standing_zoom_in,
@@ -34,7 +35,7 @@ export default function PlanClassScreen() {
 
     incrementDataVersion();
     Alert.alert('Saved!', 'Class plan saved successfully.');
-    setKey((k) => k + 1);
+    setResetCount((k) => k + 1);
   };
 
   if (!db) {
@@ -47,7 +48,7 @@ export default function PlanClassScreen() {
 
   return (
     <ClassForm
-      key={key}
+      key={`${paramsKey}-${resetCount}`}
       initialData={initialData}
       onSubmit={handleSubmit}
       submitLabel="Save Class"

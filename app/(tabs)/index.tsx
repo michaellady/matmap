@@ -21,7 +21,7 @@ export default function MapScreen() {
   const weekStarts = getWeekStarts(numWeeks);
 
   const handleUsePlan = (plan: SuggestedPlan) => {
-    router.navigate({
+    router.push({
       pathname: '/(tabs)/plan' as any,
       params: {
         standing_zoom_in: plan.standing_zoom_in.id,
