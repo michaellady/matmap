@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import * as Crypto from 'expo-crypto';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ClassForm, ClassFormData } from '@/components/ClassForm';
 import { useDatabase } from '@/hooks/useDatabase';
 import { createClassLog } from '@/db/classLogs';
 import { DARK_THEME } from '@/constants/colors';
-import { useLocalSearchParams } from 'expo-router';
 
 export default function PlanClassScreen() {
   const { db, incrementDataVersion } = useDatabase();
@@ -28,14 +28,10 @@ export default function PlanClassScreen() {
   const handleSubmit = (data: ClassFormData) => {
     if (!db) return;
 
-    createClassLog(db, {
-      id: Crypto.randomUUID(),
-      ...data,
-    });
-
+    const id = Crypto.randomUUID();
+    createClassLog(db, { id, ...data });
     incrementDataVersion();
-    Alert.alert('Saved!', 'Class plan saved successfully.');
-    setResetCount((k) => k + 1);
+    router.push(`/class/${id}`);
   };
 
   if (!db) {
