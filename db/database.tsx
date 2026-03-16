@@ -57,7 +57,7 @@ function initNativeDatabase(): Database {
 async function initWebDatabase(): Promise<Database> {
   const initSqlJs = (await import('sql.js')).default;
   const SQL = await initSqlJs({
-    locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+    locateFile: () => '/matmap/sql-wasm.wasm',
   });
   const sqlDb = new SQL.Database();
 
