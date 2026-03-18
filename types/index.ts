@@ -16,7 +16,6 @@ export interface ClassLog {
   guard: string;
   pinning: string | null;
   submission: string;
-  guard_notes: string;
   notes: string;
   created_at: string;
   updated_at: string;

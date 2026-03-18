@@ -11,17 +11,17 @@ function insertTestClasses(db: ReturnType<typeof createSeededTestDb>) {
   createClassLog(db, {
     id: 'cl-1', date: '2026-03-10', week_theme: '',
     standing: 'test-id-0001', guard: 'test-id-0011', pinning: null,
-    submission: 'test-id-0017', guard_notes: '', notes: '',
+    submission: 'test-id-0017',  notes: '',
   });
   createClassLog(db, {
     id: 'cl-2', date: '2026-03-05', week_theme: '',
     standing: 'test-id-0001', guard: 'test-id-0012', pinning: null,
-    submission: 'test-id-0018', guard_notes: '', notes: '',
+    submission: 'test-id-0018',  notes: '',
   });
   createClassLog(db, {
     id: 'cl-3', date: '2026-02-15', week_theme: '',
     standing: 'test-id-0004', guard: 'test-id-0011', pinning: null,
-    submission: 'test-id-0019', guard_notes: '', notes: '',
+    submission: 'test-id-0019',  notes: '',
   });
 }
 
@@ -132,7 +132,7 @@ describe('getSuggestedPlan', () => {
     createClassLog(db, {
       id: 'cl-1', date: '2026-03-10', week_theme: '',
       standing: 'test-id-0001', guard: 'test-id-0011', pinning: null,
-      submission: 'test-id-0017', guard_notes: '', notes: '',
+      submission: 'test-id-0017',  notes: '',
     });
 
     const plan = getSuggestedPlan(db, '2026-03-14');

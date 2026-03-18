@@ -63,7 +63,6 @@ export default function ClassDetailScreen() {
           guard: classLog.guard,
           pinning: classLog.pinning,
           submission: classLog.submission,
-          guard_notes: classLog.guard_notes,
           notes: classLog.notes,
         }}
         onSubmit={handleUpdate}
@@ -81,9 +80,6 @@ export default function ClassDetailScreen() {
 
       <DetailRow label="Standing" value={classLog.standing_name} />
       <DetailRow label="Guard vs. Passing" value={classLog.guard_name} />
-      {classLog.guard_notes ? (
-        <DetailRow label="Guard Follow On" value={classLog.guard_notes} />
-      ) : null}
       {classLog.pinning_name ? (
         <DetailRow label="Pinning" value={classLog.pinning_name} />
       ) : null}

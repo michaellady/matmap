@@ -19,7 +19,6 @@ export function runMigrations(db: Database): void {
       guard TEXT NOT NULL REFERENCES technique(id),
       pinning TEXT REFERENCES technique(id),
       submission TEXT NOT NULL REFERENCES technique(id),
-      guard_notes TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))

@@ -17,7 +17,6 @@ describe('classLogs', () => {
       guard: 'test-id-0011',
       pinning: null,
       submission: 'test-id-0017',
-      guard_notes: 'Focus on underhook recovery',
       notes: 'Good class, 12 students',
     });
   }
@@ -34,7 +33,6 @@ describe('classLogs', () => {
     expect(log!.guard).toBe('test-id-0011');
     expect(log!.pinning).toBeNull();
     expect(log!.submission).toBe('test-id-0017');
-    expect(log!.guard_notes).toBe('Focus on underhook recovery');
     expect(log!.notes).toBe('Good class, 12 students');
   });
 
@@ -59,7 +57,6 @@ describe('classLogs', () => {
       guard: 'test-id-0012',
       pinning: null,
       submission: 'test-id-0018',
-      guard_notes: '',
       notes: '',
     });
 
@@ -80,14 +77,12 @@ describe('classLogs', () => {
       guard: 'test-id-0011',
       pinning: null,
       submission: 'test-id-0017',
-      guard_notes: 'Updated notes',
       notes: 'Updated general notes',
     });
 
     const log = getClassLogById(db, 'cl-1');
     expect(log!.date).toBe('2026-03-11');
     expect(log!.standing).toBe('test-id-0002');
-    expect(log!.guard_notes).toBe('Updated notes');
   });
 
   it('deletes a class log', () => {

@@ -90,8 +90,7 @@ describe('techniques', () => {
       guard: 'test-id-0011',
       pinning: null,
       submission: 'test-id-0017',
-      guard_notes: '',
-      notes: '',
+            notes: '',
     });
 
     expect(getTechniqueUsageCount(db, 'test-id-0001')).toBe(1);

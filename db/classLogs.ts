@@ -9,14 +9,13 @@ export interface CreateClassLogParams {
   guard: string;
   pinning: string | null;
   submission: string;
-  guard_notes: string;
   notes: string;
 }
 
 export function createClassLog(db: Database, params: CreateClassLogParams): void {
   db.run(
-    `INSERT INTO class_log (id, date, week_theme, standing, guard, pinning, submission, guard_notes, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO class_log (id, date, week_theme, standing, guard, pinning, submission, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       params.id,
       params.date,
@@ -25,7 +24,6 @@ export function createClassLog(db: Database, params: CreateClassLogParams): void
       params.guard,
       params.pinning,
       params.submission,
-      params.guard_notes,
       params.notes,
     ]
   );
@@ -72,7 +70,7 @@ export function updateClassLog(
   db.run(
     `UPDATE class_log SET
        date = ?, week_theme = ?, standing = ?, guard = ?,
-       pinning = ?, submission = ?, guard_notes = ?, notes = ?,
+       pinning = ?, submission = ?, notes = ?,
        updated_at = datetime('now')
      WHERE id = ?`,
     [
@@ -82,7 +80,6 @@ export function updateClassLog(
       params.guard,
       params.pinning,
       params.submission,
-      params.guard_notes,
       params.notes,
       id,
     ]

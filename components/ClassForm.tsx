@@ -23,7 +23,6 @@ export interface ClassFormData {
   guard: string;
   pinning: string | null;
   submission: string;
-  guard_notes: string;
   notes: string;
 }
 
@@ -49,7 +48,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
   const [guard, setGuard] = useState(initialData?.guard ?? '');
   const [pinning, setPinning] = useState(initialData?.pinning ?? '');
   const [submission, setSubmission] = useState(initialData?.submission ?? '');
-  const [guardNotes, setGuardNotes] = useState(initialData?.guard_notes ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
 
   const handleDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -73,7 +71,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
       guard,
       pinning: pinning || null,
       submission,
-      guard_notes: guardNotes,
       notes,
     });
   };
@@ -130,18 +127,6 @@ export function ClassForm({ initialData, onSubmit, submitLabel = 'Save Class' }:
           category="guard"
           selectedId={guard || null}
           onSelect={(id) => setGuard(id)}
-        />
-
-        {/* Guard Notes */}
-        <Text style={styles.label}>Guard vs. Pass Follow On</Text>
-        <TextInput
-          style={[styles.input, styles.multilineInput]}
-          value={guardNotes}
-          onChangeText={setGuardNotes}
-          placeholder="Follow-on details for guard vs. pass..."
-          placeholderTextColor={DARK_THEME.textMuted}
-          multiline
-          numberOfLines={3}
         />
 
         {/* Pinning */}
